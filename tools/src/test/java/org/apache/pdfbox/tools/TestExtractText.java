@@ -16,17 +16,17 @@
  */
 package org.apache.pdfbox.tools;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
 import junit.framework.TestCase;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.IOException;
+
 /**
- * Test suite for ExtractText. 
+ * Test suite for ExtractText.
  */
-public class TestExtractText extends TestCase
-{
-    
+public class TestExtractText extends TestCase {
+    //@formatter:off
     /**
      * Run the text extraction test using a pdf with embedded pdfs.
      * 
@@ -51,5 +51,40 @@ public class TestExtractText extends TestCase
         String result = outBytes.toString("UTF-8");
         assertTrue(result.contains("PDF1"));
         assertTrue(result.contains("PDF2"));
+    }
+    //@formatter:on
+
+    public void testExtractLibreOfficeLigatures() {
+        ByteArrayOutputStream outBytes = new ByteArrayOutputStream();
+        PrintStream stdout = System.out;
+        System.setOut( new PrintStream( outBytes ) );
+        try {
+            ExtractText.main( new String[]{"src/test/resources/org/apache/pdfbox/libreoffice-ligatures-test.pdf", "-console", "-encoding UTF-8"} );
+            String result = outBytes.toString( "UTF-8" );
+            boolean isAcceptableExtraction = result.equals( "conﬂict, diﬀerence, bafﬂing, ﬁnished, aﬃrmation" ) || result.equals( "conflict, difference, baffling, finished, affirmation" );
+            assertTrue( isAcceptableExtraction );
+        } catch ( IOException e ) {
+            fail( e.getMessage() );
+            e.printStackTrace();
+        } finally {
+            System.setOut( stdout );
+        }
+    }
+
+    public void testExtractMicrosoftWordLigatures() {
+        ByteArrayOutputStream outBytes = new ByteArrayOutputStream();
+        PrintStream stdout = System.out;
+        System.setOut( new PrintStream( outBytes ) );
+        try {
+            ExtractText.main( new String[]{"src/test/resources/org/apache/pdfbox/msword-ligatures-test.pdf", "-console", "-encoding UTF-8"} );
+            String result = outBytes.toString( "UTF-8" );
+            boolean isAcceptableExtraction = result.equals( "conﬂict, diﬀerence, bafﬂing, ﬁnished, aﬃrmation" ) || result.equals( "conflict, difference, baffling, finished, affirmation" );
+            assertTrue( isAcceptableExtraction );
+        } catch ( IOException e ) {
+            fail( e.getMessage() );
+            e.printStackTrace();
+        } finally {
+            System.setOut( stdout );
+        }
     }
 }
